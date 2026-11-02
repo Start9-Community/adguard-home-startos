@@ -7,9 +7,11 @@ Upstream is the official `adguard/adguardhome` Docker image, used unmodified. It
 The pin is `images['adguard-home'].source.dockerTag` in `startos/manifest/index.ts`. Track **stable** GitHub releases only; upstream publishes `v0.108.0-b.*` and `v1.0.0-b.*` betas and `beta`/`edge` image tags alongside them.
 
 ```bash
-gh release list -R AdguardTeam/AdGuardHome --exclude-pre-releases --limit 1 --json tagName -q '.[0].tagName'
-docker manifest inspect adguard/adguardhome:<tag> | jq -r '.manifests[].platform.architecture'   # must include amd64 and arm64
+gh api 'repos/AdguardTeam/AdGuardHome/releases?per_page=100' --jq '.[] | select(.draft == false and .prerelease == false) | .tag_name' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1
+curl -fsS https://hub.docker.com/v2/repositories/adguard/adguardhome/tags/<tag> | jq -r '[.images[].architecture] | unique | join(" ")'   # must include amd64 and arm64
 ```
+
+The **Check upstream** workflow runs this every Monday and opens an issue when a newer stable release exists, saying whether its image is on Docker Hub for both architectures. GitHub pauses scheduled workflows in a public repository after 60 days without activity; re-enable it from the repository's **Actions** tab.
 
 ## Applying the bump
 
