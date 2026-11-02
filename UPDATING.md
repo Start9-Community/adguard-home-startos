@@ -22,7 +22,7 @@ The **Check upstream** workflow runs this every Monday and opens an issue when a
 
 ## Releasing
 
-The **Release** workflow builds, signs, and publishes a GitHub Release whenever a `v*.*` tag is pushed. It signs with the `DEV_KEY` repository secret, the workspace's `.startos/build.key.pem`, and attaches each `.s9pk` with its SHA-256 checksum. **Tag and Release** is disabled: it needs a reference registry, which this repo doesn't use.
+The **Release** workflow builds, signs, and publishes a GitHub Release whenever a `v*.*` tag is pushed. It signs with the `DEV_KEY` repository secret, the workspace's `.startos/build.key.pem`, and attaches each `.s9pk` with its SHA-256 checksum. The package template's **Tag and Release** workflow is left out on purpose: it publishes to a Start9 registry, which this repo doesn't use, and fails on every push without one.
 
 1. Commit the version bump and push `master`.
 2. Tag that commit `v` plus the version from `startos/versions/current.ts`, with `:` replaced by `_` (git tags can't contain `:`), and push the tag:
