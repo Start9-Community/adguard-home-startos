@@ -22,14 +22,10 @@ The **Check upstream** workflow runs this every Monday and opens an issue when a
 
 ## Releasing
 
-The **Release** workflow builds, signs, and publishes a GitHub Release whenever a `v*.*` tag is pushed. It signs with the `DEV_KEY` repository secret, the workspace's `.startos/build.key.pem`, and attaches each `.s9pk` with its SHA-256 checksum. The package template's **Tag and Release** workflow is left out on purpose: it publishes to a Start9 registry, which this repo doesn't use, and fails on every push without one.
+Commit the version bump and push `master`. Nothing else is needed.
 
-1. Commit the version bump and push `master`.
-2. Tag that commit `v` plus the version from `startos/versions/current.ts`, with `:` replaced by `_` (git tags can't contain `:`), and push the tag:
+The **Tag and Release** workflow runs on every push to `master` that changes more than Markdown. It reads the package id and `version` from `startos/versions/current.ts` and asks the registry in the `REFERENCE_REGISTRY` repository variable whether that version exists. If it does, the run stops; a push that doesn't change the version publishes nothing. Otherwise it force-pushes the tag `v` plus the version with `:` replaced by `_` (`0.107.79:1` → `v0.107.79_1`), builds each architecture, creates the GitHub Release with the `.s9pk` files, and adds them to the registry in `RELEASE_REGISTRY`, which downloads them from the release. It signs with the `DEV_KEY` repository secret, a CI key that registry authorizes to publish this package.
 
-   ```bash
-   git tag v0.107.79_1
-   git push origin v0.107.79_1
-   ```
-
-The workflow does not compare the tag with the package version, so keep them identical.
+- Keep `version` a quoted string literal; the workflow reads it from the file's text.
+- A published version is never rebuilt, so a wrapper-only change that should reach users bumps the revision after the colon (`0.107.79:1` → `0.107.79:2`).
+- The **Release** workflow still builds and publishes the same way when a `v*.*` tag is pushed by hand. The tag pushed by Tag and Release doesn't trigger it.
