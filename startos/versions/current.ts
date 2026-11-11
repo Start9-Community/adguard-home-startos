@@ -1,34 +1,21 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
-import { adguardYaml } from '../fileModels/AdGuardHome.yaml'
-import { healthCheckDomain } from '../utils'
 
 export const current = VersionInfo.of({
-  version: '0.107.79:1',
+  version: '0.107.80:0',
   releaseNotes: {
     en_US:
-      'Fixes upstream DNS lookups on StartOS, adds a DNS health check that performs a real lookup, sets faster defaults on new installs, and makes backups smaller',
+      'Updates AdGuard Home to v0.107.80, a security release with updated Go dependencies and Multipath TCP disabled',
     es_ES:
-      'Corrige las consultas DNS de subida en StartOS, añade una comprobación de salud DNS que realiza una consulta real, establece valores predeterminados más rápidos en nuevas instalaciones y reduce el tamaño de las copias de seguridad',
+      'Actualiza AdGuard Home a v0.107.80, una versión de seguridad con dependencias de Go actualizadas y Multipath TCP desactivado',
     de_DE:
-      'Behebt Upstream-DNS-Abfragen unter StartOS, fügt eine DNS-Zustandsprüfung mit echter Abfrage hinzu, setzt schnellere Standardwerte bei Neuinstallationen und verkleinert Backups',
+      'Aktualisiert AdGuard Home auf v0.107.80, ein Sicherheitsupdate mit aktualisierten Go-Abhängigkeiten und deaktiviertem Multipath TCP',
     pl_PL:
-      'Naprawia zapytania do nadrzędnych serwerów DNS w StartOS, dodaje kontrolę stanu DNS wykonującą prawdziwe zapytanie, ustawia szybsze wartości domyślne w nowych instalacjach i zmniejsza kopie zapasowe',
+      'Aktualizuje AdGuard Home do v0.107.80, wydania bezpieczeństwa z zaktualizowanymi zależnościami Go i wyłączonym Multipath TCP',
     fr_FR:
-      'Corrige les requêtes DNS en amont sur StartOS, ajoute une vérification de santé DNS qui effectue une vraie requête, définit des valeurs par défaut plus rapides pour les nouvelles installations et réduit la taille des sauvegardes',
+      'Met à jour AdGuard Home vers v0.107.80, une version de sécurité avec des dépendances Go mises à jour et Multipath TCP désactivé',
   },
   migrations: {
-    up: async ({ effects }) => {
-      const conf = await adguardYaml.read().once()
-      if (!conf) return
-      const hideHealthCheck = (ignored: string[]) => ({
-        ignored: [...new Set([...ignored, healthCheckDomain])],
-        ignored_enabled: true,
-      })
-      await adguardYaml.merge(effects, {
-        querylog: hideHealthCheck(conf.querylog.ignored),
-        statistics: hideHealthCheck(conf.statistics.ignored),
-      })
-    },
+    up: async ({ effects }) => {},
     down: IMPOSSIBLE,
   },
 })
