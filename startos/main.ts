@@ -13,7 +13,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
   // An empty users list would leave the dashboard open to anyone.
   if (!passwordHash) {
     throw new Error(
-      'No admin password is set. Run the Set Admin Password action.',
+      i18n('No admin password is set. Run the Set Admin Password action.'),
     )
   }
 

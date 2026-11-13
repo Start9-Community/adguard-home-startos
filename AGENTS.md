@@ -7,6 +7,5 @@ which provides the packaging guide and agent context one level up. If you're rea
 bare clone with no workspace, the full guide is at <https://docs.start9.com/packaging>.
 
 - Never let `main.ts` start AdGuard Home with an empty `users` list — AdGuard treats no users as no authentication, leaving the dashboard open.
-- Don't move DNS to a single `bindPort` or to a port ≤ 1024: StartOS binds UDP only through `bindPortRange` (≥ 2 ports, all > 1024), and owns port 53 itself.
-- Keep the `dot` binding `secure: null`, not `{ ssl: false }` like a DNS port: `ssl: false` would also publish its plaintext TCP port on every LAN and public address.
+- Keep plain DNS and DNS-over-TLS on the one `dns` binding: AdGuard Home has a single DNS listener, and StartOS rejects a second claim on the same internal port. Don't move it to a port ≤ 1024; StartOS owns port 53.
 - Never set `bootstrap_dns` or `fallback_dns` to a public resolver: StartOS drops container DNS on port 53 to any address but `sdk.getOsIp`, so those lookups hang.

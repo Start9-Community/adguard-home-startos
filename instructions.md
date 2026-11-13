@@ -1,11 +1,11 @@
 # AdGuard Home
 
-StartOS keeps port 53 for its own DNS, so you can't enter this server's address as a normal DNS server on your router or devices. Use the **DNS-over-HTTPS** address, the **DNS-over-TLS** address (for Android), or the **Plain DNS** port from a router that accepts a custom DNS port.
-
 ## Documentation
 
-- [AdGuard Home knowledge base](https://adguard-dns.io/kb/adguard-home/*) — upstream guides to settings, filtering, clients, and the FAQ.
 - [AdGuard Home README](https://github.com/AdguardTeam/AdGuardHome/blob/master/README.md) — the upstream project overview and feature list.
+- [Configuration](https://adguard-dns.io/kb/adguard-home/configuration/) ([source](https://github.com/AdguardTeam/KnowledgeBaseDNS/blob/master/docs/adguard-home/configuration.md)) — the upstream guide to AdGuard Home's settings.
+- [Clients](https://adguard-dns.io/kb/adguard-home/clients/) ([source](https://github.com/AdguardTeam/KnowledgeBaseDNS/blob/master/docs/adguard-home/clients.md)) — setting up devices and per-client rules.
+- [FAQ](https://adguard-dns.io/kb/adguard-home/faq/) ([source](https://github.com/AdguardTeam/KnowledgeBaseDNS/blob/master/docs/adguard-home/faq.md)) — upstream answers to common questions.
 
 ## What you get on StartOS
 
@@ -52,7 +52,7 @@ With a home router, using it from your home Wi-Fi also needs NAT loopback (hairp
 
 Private DNS fails with "Couldn't connect" while a VPN is on, including StartTunnel's WireGuard app. Turn the VPN off when you set it up.
 
-**Warning:** anyone who knows the domain can use your server for DNS. AdGuard Home can't tell DNS-over-TLS clients apart (they all appear to come from StartOS), so **Settings → Access settings** and client IDs can't restrict this interface. Only forward port 853 if you accept that.
+**Warning:** anyone who knows the domain can use your server for DNS. To limit who can, list your devices' addresses under **Settings → Access settings → Allowed clients**.
 
 ## Using it over a StartTunnel VPN
 
@@ -81,15 +81,18 @@ The dashboard opens to statistics for the last day. Blocklists live under **Filt
 
 A new install starts with Quad9 and Cloudflare as upstream servers, asked in parallel, with optimistic caching on and 7 days of query log and statistics. Change any of these in AdGuard Home's settings.
 
+If you publish this server through a tunnel to keep your home IP private, send its outbound traffic through that tunnel too. Otherwise the upstream DNS providers (Quad9 and Cloudflare by default) and the blocklist hosts see your home IP. If you use the tunnel for another reason, such as a port your router can't forward, there is nothing to change.
+
 ### Actions
 
 - **Set Admin Password**: generates a new admin password and shows it once. Run it if you lose the password or want to change it. If AdGuard Home is running it restarts briefly, and the old password stops working.
 
 ## Limitations
 
+- You can't enter this server's address as an ordinary DNS server on your router or devices: StartOS keeps port 53 for its own DNS. Use the **DNS-over-HTTPS** address, the **DNS-over-TLS** address, or the **Plain DNS** port on 5300.
 - Settings under **Settings → Encryption** do nothing here. StartOS already handles encryption for the DNS-over-HTTPS and DNS-over-TLS addresses. DNS-over-QUIC and DNSCrypt are not available.
 - DNS-over-TLS can't use port 853 without a router port forward.
-- In the query log, DNS-over-TLS queries all show StartOS's internal address instead of the real device, and devices on a StartTunnel VPN all show the subnet's resolver address.
+- In the query log, devices on a StartTunnel VPN all show the subnet's resolver address.
 - Backups don't include the query log or the downloaded blocklists. After a restore, the blocklists download again as soon as AdGuard Home starts.
 - The **Bootstrap DNS servers** setting resets to StartOS's own DNS server on every start. StartOS doesn't let services reach any other DNS server directly.
 - The DHCP server is not available.
