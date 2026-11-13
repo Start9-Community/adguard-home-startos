@@ -94,5 +94,5 @@ If you publish this server through a tunnel to keep your home IP private, send i
 - DNS-over-TLS can't use port 853 without a router port forward.
 - In the query log, devices on a StartTunnel VPN all show the subnet's resolver address.
 - Backups don't include the query log or the downloaded blocklists. After a restore, the blocklists download again as soon as AdGuard Home starts.
-- The **Bootstrap DNS servers** setting resets to StartOS's own DNS server on every start. StartOS doesn't let services reach any other DNS server directly.
+- The **Bootstrap DNS servers** setting resets to StartOS's own DNS server on every start. To change which DNS servers AdGuard Home's own lookups go to, set them in StartOS on this service's **Outbound Traffic** tab.
 - The DHCP server is not available.
