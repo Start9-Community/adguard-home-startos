@@ -94,16 +94,16 @@ export const main = sdk.setupMain(async ({ effects }) => {
           const allowed = await adguardYaml
             .read((c) => c.dns.allowed_clients)
             .once()
+          // Lookup failure does not distinguish access denial from upstream failure.
           return {
             result: 'failure' as const,
-            message:
-              allowed?.length && !allowed.some((c) => c.startsWith('127.'))
-                ? i18n(
-                    'AdGuard Home refuses the health check. Add 127.0.0.1 under Settings → Access settings → Allowed clients in AdGuard Home.',
-                  )
-                : i18n(
-                    'AdGuard Home is not resolving DNS queries. Check its upstream DNS servers.',
-                  ),
+            message: allowed?.length
+              ? i18n(
+                  'The DNS health check failed. Check the upstream DNS servers and ensure 127.0.0.1 is allowed under Settings → Access settings → Allowed clients in AdGuard Home.',
+                )
+              : i18n(
+                  'AdGuard Home is not resolving DNS queries. Check its upstream DNS servers.',
+                ),
           }
         },
       },
