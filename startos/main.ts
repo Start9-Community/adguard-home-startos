@@ -70,24 +70,42 @@ export const main = sdk.setupMain(async ({ effects }) => {
           starting: 5_000,
           failure: 15_000,
         }),
-        fn: () =>
-          sdk.healthCheck.runHealthScript(
-            [
-              'nslookup',
-              '-type=a',
-              // A fresh name each run, so AdGuard's cache can't answer it.
-              `${Math.random().toString(36).slice(2, 10)}.${healthCheckDomain}`,
-              `127.0.0.1:${dnsPort}`,
-            ],
-            adguardSub,
-            {
-              timeout: 20_000,
-              errorMessage: i18n(
-                'AdGuard Home is not resolving DNS queries. Check its upstream DNS servers.',
-              ),
-              message: () => i18n('AdGuard Home is resolving DNS queries'),
-            },
-          ),
+        fn: async () => {
+          // A fresh name each run, so AdGuard's cache can't answer it.
+          const probeName = `${Math.random().toString(36).slice(2, 10)}.${healthCheckDomain}`
+          // Access allowlists must admit the loopback health-check client.
+          const { exitCode, stdout } = await adguardSub.exec(
+            ['nslookup', '-type=a', probeName, `127.0.0.1:${dnsPort}`],
+            { timeout: 20_000 },
+          )
+          // NXDOMAIN is a healthy response to a random probe.
+          const healthy =
+            exitCode === 0 ||
+            (exitCode === 1 &&
+              stdout
+                .toString()
+                .split('\n')
+                .includes(`** server can't find ${probeName}: NXDOMAIN`))
+          if (healthy)
+            return {
+              result: 'success' as const,
+              message: i18n('AdGuard Home is resolving DNS queries'),
+            }
+          const allowed = await adguardYaml
+            .read((c) => c.dns.allowed_clients)
+            .once()
+          return {
+            result: 'failure' as const,
+            message:
+              allowed?.length && !allowed.some((c) => c.startsWith('127.'))
+                ? i18n(
+                    'AdGuard Home refuses the health check. Add 127.0.0.1 under Settings → Access settings → Allowed clients in AdGuard Home.',
+                  )
+                : i18n(
+                    'AdGuard Home is not resolving DNS queries. Check its upstream DNS servers.',
+                  ),
+          }
+        },
       },
       requires: ['adguard-home'],
     })
@@ -123,7 +141,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
             : {
                 result: 'failure' as const,
                 message: i18n(
-                  'Plain DNS is open to anyone on the internet. Turn off its public addresses, or list your clients under Settings → Access settings → Allowed clients in AdGuard Home.',
+                  'Plain DNS is open to anyone on the internet. Turn off its public addresses, or list your clients under Settings → Access settings → Allowed clients in AdGuard Home. Include 127.0.0.1 for the DNS health check.',
                 ),
               }
         },

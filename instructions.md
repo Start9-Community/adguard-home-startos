@@ -52,7 +52,7 @@ With a home router, using it from your home Wi-Fi also needs NAT loopback (hairp
 
 Private DNS fails with "Couldn't connect" while a VPN is on, including StartTunnel's WireGuard app. Turn the VPN off when you set it up.
 
-**Warning:** anyone who knows the domain can use your server for DNS. To limit who can, list your devices' addresses under **Settings → Access settings → Allowed clients**.
+**Warning:** anyone who knows the domain can use your server for DNS. To limit who can, list your devices' addresses under **Settings → Access settings → Allowed clients**. Include `127.0.0.1` in that list so the DNS health check can query the server.
 
 ## Using it over a StartTunnel VPN
 
