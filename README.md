@@ -140,12 +140,13 @@ The upstream first-run setup wizard (port 3000 on a fresh install) is never show
 
 ## Health Checks
 
-The web check inspects a listening socket. The DNS check performs a real lookup through AdGuard Home.
+The web check inspects a listening socket. The DNS check performs a real lookup through AdGuard Home. The exposure check reads the package's own `dns` host and AdGuard's access list.
 
-| Check id                       | Probes                                                                                                           | Failure means                                                                                                                                                                                                                              |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `adguard-home` (Web Interface) | TCP port 3000 listening                                                                                          | AdGuard Home has not started its web server. Check the service log for a config parse error or crash.                                                                                                                                      |
-| `dns` (DNS Server)             | `nslookup -type=a <random>.one.one.one.one 127.0.0.1:5300` in `adguard-home-sub`; every 60 s, 15 s while failing | AdGuard Home did not answer within 5 seconds, or answered with an error. Usually its upstream servers are unreachable or misconfigured: use **Test upstreams** under Settings → DNS settings. Otherwise look for `bind` errors in the log. |
+| Check id                             | Probes                                                                                                                                     | Failure means                                                                                                                                                                                                                                           |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `adguard-home` (Web Interface)       | TCP port 3000 listening                                                                                                                    | AdGuard Home has not started its web server. Check the service log for a config parse error or crash.                                                                                                                                                   |
+| `dns` (DNS Server)                   | `nslookup -type=a <random>.one.one.one.one 127.0.0.1:5300` in `adguard-home-sub`; every 60 s, 15 s while failing                           | AdGuard Home did not answer within 5 seconds, or answered with an error. Usually its upstream servers are unreachable or misconfigured: use **Test upstreams** under Settings → DNS settings. Otherwise look for `bind` errors in the log.              |
+| `open-resolver` (Plain DNS Exposure) | Every 30 s: whether the `dns` interface has a public address enabled, and whether `dns.allowed_clients` in `AdGuardHome.yaml` is non-empty | Plain DNS is published on a public address with no allowed clients, so anyone on the internet can use the server, including for DNS amplification. Turn off the public address, or list the clients under Settings → Access settings → Allowed clients. |
 
 Each check asks for a new random name, so the cache never answers it: every check reaches an upstream server. A non-existent-name answer passes, as does a blocked one: the check proves AdGuard Home can resolve, not that a name is allowed. With every upstream down, AdGuard waits out its upstream timeout before trying the fallback server, so the check fails even while slow fallback answers still arrive. The lookups are hidden from the query log and statistics through their ignored lists; removing `||one.one.one.one^` from those lists, or turning the lists off, shows a lookup every minute from `127.0.0.1`.
 
@@ -194,4 +195,5 @@ tasks:
 health_checks:
   - adguard-home
   - dns
+  - open-resolver
 ```

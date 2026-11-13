@@ -10,6 +10,10 @@ const dict = {
   'AdGuard Home is resolving DNS queries': 5,
   'AdGuard Home is not resolving DNS queries. Check its upstream DNS servers.': 6,
   'No admin password is set. Run the Set Admin Password action.': 22,
+  'Plain DNS Exposure': 23,
+  'Plain DNS is not published to the internet': 24,
+  'Plain DNS on the internet answers only allowed clients': 25,
+  'Plain DNS is open to anyone on the internet. Turn off its public addresses, or list your clients under Settings → Access settings → Allowed clients in AdGuard Home.': 26,
 
   // interfaces.ts
   'The AdGuard Home dashboard and settings': 7,

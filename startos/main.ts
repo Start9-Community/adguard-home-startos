@@ -91,4 +91,43 @@ export const main = sdk.setupMain(async ({ effects }) => {
       },
       requires: ['adguard-home'],
     })
+    .addHealthCheck('open-resolver', {
+      ready: {
+        display: i18n('Plain DNS Exposure'),
+        trigger: sdk.trigger.statusTrigger(30_000),
+        fn: async () => {
+          const isPublic = await sdk.host
+            .getOwn(
+              effects,
+              'dns',
+              (h) =>
+                !!h?.bindings[dnsPort]?.interfaces.dns?.addressInfo?.public
+                  .hostnames.length,
+            )
+            .once()
+          if (!isPublic)
+            return {
+              result: 'success' as const,
+              message: i18n('Plain DNS is not published to the internet'),
+            }
+          const allowed = await adguardYaml
+            .read((c) => c.dns.allowed_clients)
+            .once()
+          return allowed?.length
+            ? {
+                result: 'success' as const,
+                message: i18n(
+                  'Plain DNS on the internet answers only allowed clients',
+                ),
+              }
+            : {
+                result: 'failure' as const,
+                message: i18n(
+                  'Plain DNS is open to anyone on the internet. Turn off its public addresses, or list your clients under Settings → Access settings → Allowed clients in AdGuard Home.',
+                ),
+              }
+        },
+      },
+      requires: [],
+    })
 })

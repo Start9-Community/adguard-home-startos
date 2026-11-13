@@ -25,6 +25,10 @@ export default {
     20: 'DNS sobre TLS',
     21: 'DNS cifrado para el DNS privado de Android y otros clientes de DNS sobre TLS',
     22: 'No hay contraseña de administrador. Ejecute la acción Establecer contraseña de administrador.',
+    23: 'Exposición del DNS sin cifrar',
+    24: 'El DNS sin cifrar no está publicado en internet',
+    25: 'El DNS sin cifrar en internet solo responde a los clientes permitidos',
+    26: 'El DNS sin cifrar está abierto a cualquiera en internet. Desactive sus direcciones públicas o indique sus clientes en Settings → Access settings → Allowed clients en AdGuard Home.',
   },
   de_DE: {
     0: 'Starte AdGuard Home!',
@@ -50,6 +54,10 @@ export default {
     20: 'DNS-over-TLS',
     21: 'Verschlüsseltes DNS für privates DNS unter Android und andere DNS-over-TLS-Clients',
     22: 'Es ist kein Administratorpasswort gesetzt. Führen Sie die Aktion Admin-Passwort festlegen aus.',
+    23: 'Erreichbarkeit von unverschlüsseltem DNS',
+    24: 'Unverschlüsseltes DNS ist nicht im Internet veröffentlicht',
+    25: 'Unverschlüsseltes DNS im Internet antwortet nur zugelassenen Clients',
+    26: 'Unverschlüsseltes DNS ist für jeden im Internet offen. Schalten Sie seine öffentlichen Adressen ab oder tragen Sie Ihre Clients in AdGuard Home unter Settings → Access settings → Allowed clients ein.',
   },
   pl_PL: {
     0: 'Uruchamianie AdGuard Home!',
@@ -75,6 +83,10 @@ export default {
     20: 'DNS przez TLS',
     21: 'Szyfrowany DNS dla prywatnego DNS w Androidzie i innych klientów DNS przez TLS',
     22: 'Nie ustawiono hasła administratora. Uruchom akcję Ustaw hasło administratora.',
+    23: 'Dostępność nieszyfrowanego DNS',
+    24: 'Nieszyfrowany DNS nie jest opublikowany w internecie',
+    25: 'Nieszyfrowany DNS w internecie odpowiada tylko dozwolonym klientom',
+    26: 'Nieszyfrowany DNS jest otwarty dla każdego w internecie. Wyłącz jego publiczne adresy lub wpisz swoich klientów w AdGuard Home w Settings → Access settings → Allowed clients.',
   },
   fr_FR: {
     0: 'Démarrage de AdGuard Home !',
@@ -100,5 +112,9 @@ export default {
     20: 'DNS sur TLS',
     21: 'DNS chiffré pour le DNS privé d’Android et les autres clients DNS sur TLS',
     22: "Aucun mot de passe administrateur n'est défini. Exécutez l'action Définir le mot de passe administrateur.",
+    23: 'Exposition du DNS non chiffré',
+    24: "Le DNS non chiffré n'est pas publié sur internet",
+    25: "Le DNS non chiffré sur internet ne répond qu'aux clients autorisés",
+    26: 'Le DNS non chiffré est ouvert à tout internet. Désactivez ses adresses publiques ou indiquez vos clients dans AdGuard Home sous Settings → Access settings → Allowed clients.',
   },
 } satisfies Record<string, LangDict>
