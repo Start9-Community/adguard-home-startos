@@ -71,7 +71,7 @@ The package owns a few keys in AdGuard Home's config and keeps its own state fil
 | `dns.fallback_dns`                         | the StartOS DNS address                                   | Used only when every upstream fails; always reachable from the container                        |
 | `dns.cache_optimistic`                     | `true`                                                    | Expired cache entries are answered at once and refreshed in the background                      |
 | `querylog.interval`, `statistics.interval` | `7d`                                                      | A smaller query log and a week of statistics                                                    |
-| `querylog.ignored`, `statistics.ignored`   | `one.one.one.one`, with `ignored_enabled: true`           | Keeps the DNS health check's lookups out of the query log and statistics                        |
+| `querylog.ignored`, `statistics.ignored`   | `\|\|one.one.one.one^`, with `ignored_enabled: true`      | Keeps the DNS health check's lookups out of the query log and statistics                        |
 
 **Before every start**, the package re-asserts these keys, overriding any edit:
 
@@ -87,7 +87,7 @@ The package owns a few keys in AdGuard Home's config and keeps its own state fil
 
 Changing the web or DNS listen address, or the bootstrap servers, in AdGuard's own settings therefore reverts on the next start. AdGuard's default bootstrap servers are public resolvers on port 53, which StartOS never lets a container reach, so without this lock an upstream given as a hostname (AdGuard's own default, `https://dns10.quad9.net/dns-query`) never resolves. StartOS answers the container's lookups through the DNS servers set on the service's **Outbound Traffic** tab, so that tab, not AdGuard's bootstrap setting, chooses where bootstrap and fallback lookups go. All other settings (filters, upstreams, rules, clients, retention) are left alone and survive restarts and updates. The `tls` section is unused: encryption is handled by StartOS.
 
-**On update from the first release**, a migration adds `one.one.one.one` to both ignored lists and turns `ignored_enabled` on. It changes nothing else: the install values above are not applied to an existing install.
+**On update from an earlier build**, a migration puts the health-check rule in both ignored lists and turns `ignored_enabled` on: a list without it gets the rule added, and a plain `one.one.one.one` entry is rewritten to `||one.one.one.one^`, which also covers its subdomains. It changes nothing else: the install values above are not applied to an existing install.
 
 **`store.json`** (JSON). Holds `adminPasswordHash`, written only by the Set Admin Password action. The plaintext password is never stored.
 
@@ -142,12 +142,12 @@ The upstream first-run setup wizard (port 3000 on a fresh install) is never show
 
 The web check inspects a listening socket. The DNS check performs a real lookup through AdGuard Home.
 
-| Check id                       | Probes                                                                                                  | Failure means                                                                                                                                                                                                             |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `adguard-home` (Web Interface) | TCP port 3000 listening                                                                                 | AdGuard Home has not started its web server. Check the service log for a config parse error or crash.                                                                                                                     |
-| `dns` (DNS Server)             | `nslookup -type=a one.one.one.one 127.0.0.1:5300` in `adguard-home-sub`; every 60 s, 15 s while failing | AdGuard Home did not answer, or answered with an error. Usually its upstream servers are unreachable or misconfigured: use **Test upstreams** under Settings → DNS settings. Otherwise look for `bind` errors in the log. |
+| Check id                       | Probes                                                                                                           | Failure means                                                                                                                                                                                                                              |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `adguard-home` (Web Interface) | TCP port 3000 listening                                                                                          | AdGuard Home has not started its web server. Check the service log for a config parse error or crash.                                                                                                                                      |
+| `dns` (DNS Server)             | `nslookup -type=a <random>.one.one.one.one 127.0.0.1:5300` in `adguard-home-sub`; every 60 s, 15 s while failing | AdGuard Home did not answer within 5 seconds, or answered with an error. Usually its upstream servers are unreachable or misconfigured: use **Test upstreams** under Settings → DNS settings. Otherwise look for `bind` errors in the log. |
 
-A blocked answer still passes: the check proves AdGuard Home answers, not that the name is allowed. With optimistic caching on, cached answers keep the check green through a short upstream outage. The lookups are hidden from the query log and statistics through their ignored lists; removing `one.one.one.one` from those lists, or turning the lists off, shows a lookup every minute from `127.0.0.1`.
+Each check asks for a new random name, so the cache never answers it: every check reaches an upstream server. A non-existent-name answer passes, as does a blocked one: the check proves AdGuard Home can resolve, not that a name is allowed. With every upstream down, AdGuard waits out its upstream timeout before trying the fallback server, so the check fails even while slow fallback answers still arrive. The lookups are hidden from the query log and statistics through their ignored lists; removing `||one.one.one.one^` from those lists, or turning the lists off, shows a lookup every minute from `127.0.0.1`.
 
 ## Backups and Restore
 

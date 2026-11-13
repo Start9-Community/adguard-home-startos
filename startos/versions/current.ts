@@ -1,6 +1,7 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 import { sdk } from '../sdk'
-import { dnsPort } from '../utils'
+import { adguardYaml } from '../fileModels/AdGuardHome.yaml'
+import { dnsPort, healthCheckDomain, healthCheckIgnoreRule } from '../utils'
 
 export const current = VersionInfo.of({
   version: '0.107.80:2',
@@ -19,6 +20,17 @@ export const current = VersionInfo.of({
   migrations: {
     up: async ({ effects }) => {
       await sdk.MultiHost.of(effects, 'dns').retirePort(dnsPort)
+
+      const conf = await adguardYaml.read().once()
+      if (!conf) return
+      const toRule = (ignored: string[]) =>
+        ignored.map((h) =>
+          h === healthCheckDomain ? healthCheckIgnoreRule : h,
+        )
+      await adguardYaml.merge(effects, {
+        querylog: { ignored: toRule(conf.querylog.ignored) },
+        statistics: { ignored: toRule(conf.statistics.ignored) },
+      })
     },
     down: IMPOSSIBLE,
   },

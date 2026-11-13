@@ -72,7 +72,13 @@ export const main = sdk.setupMain(async ({ effects }) => {
         }),
         fn: () =>
           sdk.healthCheck.runHealthScript(
-            ['nslookup', '-type=a', healthCheckDomain, `127.0.0.1:${dnsPort}`],
+            [
+              'nslookup',
+              '-type=a',
+              // A fresh name each run, so AdGuard's cache can't answer it.
+              `${Math.random().toString(36).slice(2, 10)}.${healthCheckDomain}`,
+              `127.0.0.1:${dnsPort}`,
+            ],
             adguardSub,
             {
               timeout: 20_000,
