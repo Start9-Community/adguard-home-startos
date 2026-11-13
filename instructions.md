@@ -28,6 +28,14 @@ StartOS keeps port 53 for its own DNS, so you can't enter this server's address 
 5. Optional: set up Android Private DNS (next section).
 6. Visit a few sites from a configured device, then check the dashboard's query log to confirm queries are arriving.
 
+## Recommended setup
+
+Which way to use this server depends on where your devices are:
+
+- **At home:** use the **DNS-over-HTTPS** address in each browser or OS (step 3 above), or forward your router's DNS to port **5300** (step 4) so every device is filtered with no setup of its own.
+- **Away from home (recommended):** connect your phone and laptop to a **StartTunnel** VPN and point the tunnel's subnet DNS at this server. WireGuard already encrypts the DNS, every device is covered on any network, and nothing has to be opened on your home router. Follow [Using it over a StartTunnel VPN](#using-it-over-a-starttunnel-vpn).
+- **Android without a VPN:** use Private DNS with your own domain and a StartTunnel published port. This exposes the server to anyone who knows the domain, so prefer the VPN. See the next section.
+
 ## Android Private DNS (DNS-over-TLS)
 
 Android's **Private DNS** accepts only a hostname, always connects on port 853, and requires a publicly trusted certificate. StartOS doesn't let services use port 853 directly, so the **DNS-over-TLS** interface gets a different, high-numbered port. To make it work:

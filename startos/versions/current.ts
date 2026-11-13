@@ -1,18 +1,18 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '0.107.80:0',
+  version: '0.107.80:1',
   releaseNotes: {
     en_US:
-      'Updates AdGuard Home to v0.107.80, a security release with updated Go dependencies and Multipath TCP disabled',
+      'Rebuilt with the latest StartOS SDK and added a recommended setup guide, including StartTunnel, to the instructions',
     es_ES:
-      'Actualiza AdGuard Home a v0.107.80, una versión de seguridad con dependencias de Go actualizadas y Multipath TCP desactivado',
+      'Reconstruido con el SDK de StartOS más reciente y se añadió a las instrucciones una guía de configuración recomendada, incluido StartTunnel',
     de_DE:
-      'Aktualisiert AdGuard Home auf v0.107.80, ein Sicherheitsupdate mit aktualisierten Go-Abhängigkeiten und deaktiviertem Multipath TCP',
+      'Mit dem neuesten StartOS-SDK neu erstellt und eine empfohlene Einrichtungsanleitung, einschließlich StartTunnel, in die Anleitung aufgenommen',
     pl_PL:
-      'Aktualizuje AdGuard Home do v0.107.80, wydania bezpieczeństwa z zaktualizowanymi zależnościami Go i wyłączonym Multipath TCP',
+      'Przebudowano z najnowszym SDK StartOS i dodano do instrukcji zalecany przewodnik konfiguracji, w tym StartTunnel',
     fr_FR:
-      'Met à jour AdGuard Home vers v0.107.80, une version de sécurité avec des dépendances Go mises à jour et Multipath TCP désactivé',
+      "Reconstruit avec le dernier SDK StartOS et ajout d'un guide de configuration recommandé, y compris StartTunnel, aux instructions",
   },
   migrations: {
     up: async ({ effects }) => {},

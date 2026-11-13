@@ -87,7 +87,7 @@ The package owns a few keys in AdGuard Home's config and keeps its own state fil
 
 Changing the web or DNS listen address, or the bootstrap servers, in AdGuard's own settings therefore reverts on the next start. AdGuard's default bootstrap servers are public resolvers on port 53, which StartOS never lets a container reach, so without this lock an upstream given as a hostname (AdGuard's own default, `https://dns10.quad9.net/dns-query`) never resolves. All other settings (filters, upstreams, rules, clients, retention) are left alone and survive restarts and updates. The `tls` section is unused: encryption is handled by StartOS.
 
-**On update from `0.107.79:0`**, a migration adds `one.one.one.one` to both ignored lists and turns `ignored_enabled` on. It changes nothing else: the install values above are not applied to an existing install.
+**On update from the first release**, a migration adds `one.one.one.one` to both ignored lists and turns `ignored_enabled` on. It changes nothing else: the install values above are not applied to an existing install.
 
 **`store.json`** (JSON). Holds `adminPasswordHash`, written only by the Set Admin Password action. The plaintext password is never stored.
 
