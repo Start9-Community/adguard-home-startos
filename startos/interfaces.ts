@@ -39,7 +39,7 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
     protocol: null,
     secure: { ssl: false },
     preferredExternalPort: dnsPort,
-    addSsl: { preferredExternalPort: dotPort, alpn: null },
+    addSsl: null,
   })
   const dnsReceipt = await dnsOrigin.export([
     sdk.createInterface(effects, {
@@ -55,6 +55,16 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
       path: '',
       query: {},
     }),
+  ])
+
+  // Public DoT must not expose plaintext DNS.
+  const dotOrigin = await sdk.MultiHost.of(effects, 'dot').bindPort(dnsPort, {
+    protocol: null,
+    secure: null,
+    preferredExternalPort: dnsPort,
+    addSsl: { preferredExternalPort: dotPort, alpn: null },
+  })
+  const dotReceipt = await dotOrigin.export([
     sdk.createInterface(effects, {
       name: i18n('DNS-over-TLS'),
       id: 'dot',
@@ -70,5 +80,5 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
     }),
   ])
 
-  return [webReceipt, dnsReceipt]
+  return [webReceipt, dnsReceipt, dotReceipt]
 })

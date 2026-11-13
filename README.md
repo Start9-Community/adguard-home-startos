@@ -97,7 +97,7 @@ None.
 
 ## Network Access and Interfaces
 
-The package exposes two hosts: the `web` host carries the dashboard and the DoH endpoint, and the `dns` host carries plain DNS and DNS-over-TLS.
+The package exposes three hosts: the `web` host carries the dashboard and the DoH endpoint, the `dns` host carries plain DNS, and the `dot` host carries DNS-over-TLS.
 
 | Interface id | Type | Port                         | Protocol                 | Purpose                 |
 | ------------ | ---- | ---------------------------- | ------------------------ | ----------------------- |
@@ -106,7 +106,7 @@ The package exposes two hosts: the `web` host carries the dashboard and the DoH 
 | `dns`        | api  | 5300                         | raw UDP + TCP, no TLS    | Plain DNS               |
 | `dot`        | api  | 5300, TLS port preferred 853 | raw TCP (TLS by StartOS) | DNS-over-TLS            |
 
-Both interfaces share one binding on AdGuard's single DNS listener, `protocol: null` with `secure: { ssl: false }`, so StartOS forwards its plain port (UDP and TCP) to 5300 as is, and `addSsl` adds a TLS port that StartOS terminates before passing the TCP stream to the same listener. The user enables the plain and TLS addresses separately. StartOS preserves the client's source address on both, so AdGuard sees whoever sent the query: a device that queries directly appears as itself, and a resolver forwarding for other devices appears as that resolver (a StartTunnel subnet whose DNS points here appears as the subnet's `.1` address).
+`dns` forwards UDP and TCP to port 5300 with `secure: { ssl: false }` and no TLS wrapper. `dot` separately binds the same internal TCP listener with `secure: null` and `addSsl`; StartOS terminates TLS and never exposes that host's plaintext leg on an untrusted gateway. Address choices are independent between these hosts, so adding a public DoT domain does not enable public plain DNS. StartOS preserves the client's source address on both, so AdGuard sees whoever sent the query: a device that queries directly appears as itself, and a resolver forwarding for other devices appears as that resolver (a StartTunnel subnet whose DNS points here appears as the subnet's `.1` address).
 
 Services can't claim external ports at or below 1024, so StartOS assigns a random port of 49152 or above for DNS-over-TLS instead of 853; Android Private DNS needs a forward from 853 to it, plus a public domain with a Let's Encrypt certificate.
 
