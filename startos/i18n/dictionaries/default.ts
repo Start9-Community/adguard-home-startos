@@ -9,13 +9,19 @@ const dict = {
   'DNS Server': 4,
   'AdGuard Home is resolving DNS queries': 5,
   'AdGuard Home is not resolving DNS queries. Check its upstream DNS servers.': 6,
+  'No admin password is set. Run the Set Admin Password action.': 22,
+  'Plain DNS Exposure': 23,
+  'Plain DNS is not published to the internet': 24,
+  'Plain DNS on the internet answers only allowed clients': 25,
+  'Plain DNS is open to anyone on the internet. Turn off its public addresses, or list your clients under Settings → Access settings → Allowed clients in AdGuard Home. Include 127.0.0.1 for the DNS health check.': 26,
+  'The DNS health check failed. Check the upstream DNS servers and ensure 127.0.0.1 is allowed under Settings → Access settings → Allowed clients in AdGuard Home.': 27,
 
   // interfaces.ts
   'The AdGuard Home dashboard and settings': 7,
   'DNS-over-HTTPS': 8,
   'Encrypted DNS endpoint for browsers and operating systems that support DNS-over-HTTPS': 9,
   'Plain DNS': 10,
-  'Unencrypted DNS over UDP and TCP on the first port of this range, for routers and resolvers that accept a custom DNS port': 11,
+  'Unencrypted DNS over UDP and TCP, for routers and resolvers that accept a custom DNS port': 11,
 
   'DNS-over-TLS': 20,
   'Encrypted DNS for Android Private DNS and other DNS-over-TLS clients': 21,

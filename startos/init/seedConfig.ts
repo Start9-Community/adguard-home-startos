@@ -1,12 +1,12 @@
 import { adguardYaml } from '../fileModels/AdGuardHome.yaml'
 import { sdk } from '../sdk'
-import { healthCheckDomain } from '../utils'
+import { healthCheckIgnoreRule } from '../utils'
 
 export const seedConfig = sdk.setupOnInit(async (effects, kind) => {
   if (kind !== 'install') return
 
   const osIp = await sdk.getOsIp(effects)
-  const ignored = { ignored: [healthCheckDomain], ignored_enabled: true }
+  const ignored = { ignored: [healthCheckIgnoreRule], ignored_enabled: true }
   await adguardYaml.merge(effects, {
     dns: {
       upstream_dns: ['https://9.9.9.10/dns-query', 'https://1.1.1.1/dns-query'],

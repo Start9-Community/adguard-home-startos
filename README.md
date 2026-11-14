@@ -71,7 +71,7 @@ The package owns a few keys in AdGuard Home's config and keeps its own state fil
 | `dns.fallback_dns`                         | the StartOS DNS address                                   | Used only when every upstream fails; always reachable from the container                        |
 | `dns.cache_optimistic`                     | `true`                                                    | Expired cache entries are answered at once and refreshed in the background                      |
 | `querylog.interval`, `statistics.interval` | `7d`                                                      | A smaller query log and a week of statistics                                                    |
-| `querylog.ignored`, `statistics.ignored`   | `one.one.one.one`, with `ignored_enabled: true`           | Keeps the DNS health check's lookups out of the query log and statistics                        |
+| `querylog.ignored`, `statistics.ignored`   | `\|\|one.one.one.one^`, with `ignored_enabled: true`      | Keeps the DNS health check's lookups out of the query log and statistics                        |
 
 **Before every start**, the package re-asserts these keys, overriding any edit:
 
@@ -81,13 +81,13 @@ The package owns a few keys in AdGuard Home's config and keeps its own state fil
 | `http.doh.insecure_enabled` | `true`                                             | StartOS terminates TLS, so DoH arrives as plain HTTP          |
 | `users`                     | one user, `admin`, with the hash from `store.json` | The package owns the credential                               |
 | `dns.bind_hosts`            | `["0.0.0.0"]`                                      | Listen on the container's interfaces                          |
-| `dns.port`                  | `5300`                                             | The port the plain DNS range is bound to                      |
+| `dns.port`                  | `5300`                                             | The port the DNS binding forwards to                          |
 | `dns.trusted_proxies`       | loopback plus the StartOS bridge address           | So the query log can attribute DoH queries to the real client |
 | `dns.bootstrap_dns`         | the StartOS DNS address                            | StartOS drops container DNS on port 53 to any other address   |
 
-Changing the web or DNS listen address, or the bootstrap servers, in AdGuard's own settings therefore reverts on the next start. AdGuard's default bootstrap servers are public resolvers on port 53, which StartOS never lets a container reach, so without this lock an upstream given as a hostname (AdGuard's own default, `https://dns10.quad9.net/dns-query`) never resolves. All other settings (filters, upstreams, rules, clients, retention) are left alone and survive restarts and updates. The `tls` section is unused: encryption is handled by StartOS.
+Changing the web or DNS listen address, or the bootstrap servers, in AdGuard's own settings therefore reverts on the next start. AdGuard's default bootstrap servers are public resolvers on port 53, which StartOS never lets a container reach, so without this lock an upstream given as a hostname (AdGuard's own default, `https://dns10.quad9.net/dns-query`) never resolves. StartOS answers the container's lookups through the DNS servers set on the service's **Outbound Traffic** tab, so that tab, not AdGuard's bootstrap setting, chooses where bootstrap and fallback lookups go. All other settings (filters, upstreams, rules, clients, retention) are left alone and survive restarts and updates. The `tls` section is unused: encryption is handled by StartOS.
 
-**On update from the first release**, a migration adds `one.one.one.one` to both ignored lists and turns `ignored_enabled` on. It changes nothing else: the install values above are not applied to an existing install.
+**On update**, the package rewrites existing plain `one.one.one.one` entries in either ignored list to `||one.one.one.one^`, which also covers subdomains. This rewrite does not add missing entries or enable a list. An earlier migration adds the original health-check name to both lists and enables them on installs that predate it; the install values above are not otherwise reapplied.
 
 **`store.json`** (JSON). Holds `adminPasswordHash`, written only by the Set Admin Password action. The plaintext password is never stored.
 
@@ -97,18 +97,18 @@ None.
 
 ## Network Access and Interfaces
 
-The package exposes three hosts: the web host carries the dashboard and the DoH endpoint, the `dot` host carries DNS-over-TLS, and the `dns` host carries plain DNS.
+The package exposes three hosts: the `web` host carries the dashboard and the DoH endpoint, the `dns` host carries plain DNS, and the `dot` host carries DNS-over-TLS.
 
-| Interface id | Type | Port                               | Protocol                 | Purpose                                        |
-| ------------ | ---- | ---------------------------------- | ------------------------ | ---------------------------------------------- |
-| `ui`         | ui   | 3000                               | HTTP (TLS by StartOS)    | AdGuard Home dashboard                         |
-| `doh`        | api  | 3000, path `/dns-query`            | HTTP (TLS by StartOS)    | DNS-over-HTTPS endpoint                        |
-| `dot`        | api  | 5300 (TCP), TLS port preferred 853 | raw TCP (TLS by StartOS) | DNS-over-TLS                                   |
-| `dns`        | api  | 5300–5301 range                    | raw UDP + TCP, no TLS    | Plain DNS on 5300; 5301 is reserved and unused |
+| Interface id | Type | Port                         | Protocol                 | Purpose                 |
+| ------------ | ---- | ---------------------------- | ------------------------ | ----------------------- |
+| `ui`         | ui   | 3000                         | HTTP (TLS by StartOS)    | AdGuard Home dashboard  |
+| `doh`        | api  | 3000, path `/dns-query`      | HTTP (TLS by StartOS)    | DNS-over-HTTPS endpoint |
+| `dns`        | api  | 5300                         | raw UDP + TCP, no TLS    | Plain DNS               |
+| `dot`        | api  | 5300, TLS port preferred 853 | raw TCP (TLS by StartOS) | DNS-over-TLS            |
 
-The `dns` interface is a port range because StartOS binds UDP only as a range of two or more ports. AdGuard listens on the first port only. StartOS forwards the range without rewriting the source address, so AdGuard sees whoever sent the query: a device that queries port 5300 directly appears as itself, and a resolver forwarding for other devices appears as that resolver (a StartTunnel subnet whose DNS points here appears as the subnet's `.1` address).
+`dns` forwards UDP and TCP to port 5300 with `secure: { ssl: false }` and no TLS wrapper. `dot` separately binds the same internal TCP listener with `secure: null` and `addSsl`; StartOS terminates TLS and never exposes that host's plaintext leg on an untrusted gateway. Address choices are independent between these hosts, so adding a public DoT domain does not enable public plain DNS. StartOS preserves the client's source address on both, so AdGuard sees whoever sent the query: a device that queries directly appears as itself, and a resolver forwarding for other devices appears as that resolver (a StartTunnel subnet whose DNS points here appears as the subnet's `.1` address).
 
-The `dot` binding is `protocol: null`, `secure: null`, with `addSsl` preferring external port 853. StartOS terminates TLS and forwards the plain DNS-over-TCP stream to AdGuard's TCP listener on 5300 (the same listener the `dns` range uses; each host checks overlaps on its own). Services can't claim external ports at or below 1024, so StartOS assigns a random port of 49152 or above instead of 853; Android Private DNS needs a router forward from 853 to it, plus a public domain with a Let's Encrypt certificate. `secure: null` keeps the binding's plaintext port on the server itself, so off-box clients reach it only through TLS.
+Services can't claim external ports at or below 1024, so StartOS assigns a random port of 49152 or above for DNS-over-TLS instead of 853; Android Private DNS needs a forward from 853 to it, plus a public domain with a Let's Encrypt certificate.
 
 AdGuard's web UI also offers DNS-over-TLS, DNS-over-QUIC, DNSCrypt, and HTTPS settings under **Encryption**. None of those listeners is bound by this package, so enabling them has no effect from outside the container. DoT is served by StartOS's TLS termination instead.
 
@@ -140,14 +140,15 @@ The upstream first-run setup wizard (port 3000 on a fresh install) is never show
 
 ## Health Checks
 
-The web check inspects a listening socket. The DNS check performs a real lookup through AdGuard Home.
+The web check inspects a listening socket. The DNS check performs a real lookup through AdGuard Home. The exposure check reads the package's own `dns` host and AdGuard's access list.
 
-| Check id                       | Probes                                                                                                  | Failure means                                                                                                                                                                                                             |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `adguard-home` (Web Interface) | TCP port 3000 listening                                                                                 | AdGuard Home has not started its web server. Check the service log for a config parse error or crash.                                                                                                                     |
-| `dns` (DNS Server)             | `nslookup -type=a one.one.one.one 127.0.0.1:5300` in `adguard-home-sub`; every 60 s, 15 s while failing | AdGuard Home did not answer, or answered with an error. Usually its upstream servers are unreachable or misconfigured: use **Test upstreams** under Settings → DNS settings. Otherwise look for `bind` errors in the log. |
+| Check id                             | Probes                                                                                                                                     | Failure means                                                                                                                                                                                                                                                                                         |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `adguard-home` (Web Interface)       | TCP port 3000 listening                                                                                                                    | AdGuard Home has not started its web server. Check the service log for a config parse error or crash.                                                                                                                                                                                                 |
+| `dns` (DNS Server)                   | `nslookup -type=a <random>.one.one.one.one 127.0.0.1:5300` in `adguard-home-sub`; every 60 s, 15 s while failing                           | AdGuard Home did not answer within 5 seconds, or answered with an error. If **Allowed clients** is non-empty, include `127.0.0.1` for this probe. Otherwise check upstreams with **Test upstreams** under Settings → DNS settings, or look for `bind` errors in the log.                              |
+| `open-resolver` (Plain DNS Exposure) | Every 30 s: whether the `dns` interface has a public address enabled, and whether `dns.allowed_clients` in `AdGuardHome.yaml` is non-empty | Plain DNS is published on a public address with no allowed clients, so anyone on the internet can use the server, including for DNS amplification. Turn off the public address, or list the clients under Settings → Access settings → Allowed clients. Include `127.0.0.1` for the DNS health check. |
 
-A blocked answer still passes: the check proves AdGuard Home answers, not that the name is allowed. With optimistic caching on, cached answers keep the check green through a short upstream outage. The lookups are hidden from the query log and statistics through their ignored lists; removing `one.one.one.one` from those lists, or turning the lists off, shows a lookup every minute from `127.0.0.1`.
+Each DNS check asks for a fresh random name to avoid AdGuard's cache. Both successful DNS replies and `NXDOMAIN` count as healthy; `SERVFAIL`, `REFUSED`, malformed replies, and timeouts fail. A filtering rule can answer the probe locally, so a passing check does not establish upstream reachability when the probe is blocked. If the upstreams time out before fallback is tried, the check can fail before a working fallback answers. The lookups are hidden from the query log and statistics through their ignored lists; removing `||one.one.one.one^` from those lists, or turning the lists off, shows a lookup every minute from `127.0.0.1`.
 
 ## Backups and Restore
 
@@ -158,12 +159,12 @@ A restored instance comes back with the same admin password, settings, and stati
 ## Limitations and Differences
 
 1. **No DNS on port 53.** StartOS runs its own DNS server on port 53, and services cannot claim ports at or below 1024. Clients cannot use the StartOS address as an ordinary DNS server. Use the DoH interface, or the plain DNS port on 5300 from a client that accepts a custom port.
-2. **DNS-over-TLS is not on port 853 by default.** StartOS assigns a high port. Android Private DNS works only with a public domain and a router forward from 853. AdGuard sees every DoT client as the StartOS proxy address, so `allowed_clients`, client IDs, and per-client settings can't tell DoT clients apart, and an exposed DoT address is open to anyone who knows the domain. AdGuard's per-IP rate limit applies only to UDP (tested: 60 parallel DoT queries from one address all answered, UDP cut off after 20), so DoT clients sharing one address are not throttled.
+2. **DNS-over-TLS is not on port 853 by default.** StartOS assigns a high port. Android Private DNS works only with a public domain and a router forward from 853. TLS ends at StartOS, so AdGuard receives DoT queries as plain TCP: client IDs carried in the TLS server name don't reach it, though `allowed_clients` and per-client settings by IP work. An exposed DoT address is open to anyone who knows the domain unless **Access settings** restricts it. AdGuard's per-IP rate limit applies only to UDP, so DoT clients are not throttled.
 3. **No DNS-over-QUIC or DNSCrypt.** These need UDP or their own TLS handling, which the package does not set up.
 4. **No DHCP server.** The container has no access to the LAN broadcast domain.
 5. **Web and DNS listen addresses are fixed.** Edits to them in AdGuard's settings revert on the next start.
 6. **Single admin account.** The `users` list is rewritten with the one `admin` user on every start.
-7. **Client attribution.** AdGuard sees the address that sends it each query. Every device behind a forwarding resolver appears as that resolver: devices on a StartTunnel subnet whose DNS points here all appear as the subnet's `.1` address, and share AdGuard's limit of 20 UDP queries per second (`dns.ratelimit`) unless that address is in `dns.ratelimit_whitelist`. StartTunnel's resolver passes on no client information, so per-device rules and statistics are not possible on that path. DoT clients all appear as the StartOS proxy address.
+7. **Client attribution.** AdGuard sees the address that sends it each query. Every device behind a forwarding resolver appears as that resolver: devices on a StartTunnel subnet whose DNS points here all appear as the subnet's `.1` address, and share AdGuard's limit of 20 UDP queries per second (`dns.ratelimit`) unless that address is in `dns.ratelimit_whitelist`. StartTunnel's resolver passes on no client information, so per-device rules and statistics are not possible on that path.
 
 ---
 
@@ -185,8 +186,8 @@ dependencies: none
 interfaces:
   ui: { type: ui, port: 3000 }
   doh: { type: api, port: 3000 }
+  dns: { type: api, port: 5300 }
   dot: { type: api, port: 5300, ssl_port_preferred: 853 }
-  dns: { type: api, port: 5300, port_range: 2 }
 actions:
   - set-admin-password
 tasks:
@@ -194,4 +195,5 @@ tasks:
 health_checks:
   - adguard-home
   - dns
+  - open-resolver
 ```
