@@ -35,23 +35,29 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
 
   const webReceipt = await webOrigin.export([ui, doh])
 
-  // UDP is only bindable as a range of at least two ports; the second is unused.
-  const dnsRange = await sdk.MultiHost.of(effects, 'dns').bindPortRange({
-    internalStartPort: dnsPort,
-    externalStartPort: dnsPort,
-    numberOfPorts: 2,
+  const dnsOrigin = await sdk.MultiHost.of(effects, 'dns').bindPort(dnsPort, {
+    protocol: null,
+    secure: { ssl: false },
+    preferredExternalPort: dnsPort,
+    addSsl: null,
   })
-  await dnsRange.export(
-    sdk.createRangeInterface(effects, {
-      id: 'dns',
+  const dnsReceipt = await dnsOrigin.export([
+    sdk.createInterface(effects, {
       name: i18n('Plain DNS'),
+      id: 'dns',
       description: i18n(
-        'Unencrypted DNS over UDP and TCP on the first port of this range, for routers and resolvers that accept a custom DNS port',
+        'Unencrypted DNS over UDP and TCP, for routers and resolvers that accept a custom DNS port',
       ),
+      type: 'api',
+      masked: false,
+      schemeOverride: null,
+      username: null,
+      path: '',
+      query: {},
     }),
-  )
+  ])
 
-  // StartOS terminates TLS and forwards AdGuard's plain TCP DNS listener.
+  // Public DoT must not expose plaintext DNS.
   const dotOrigin = await sdk.MultiHost.of(effects, 'dot').bindPort(dnsPort, {
     protocol: null,
     secure: null,
@@ -74,5 +80,5 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
     }),
   ])
 
-  return [webReceipt, dotReceipt]
+  return [webReceipt, dnsReceipt, dotReceipt]
 })

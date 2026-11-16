@@ -13,7 +13,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
   // An empty users list would leave the dashboard open to anyone.
   if (!passwordHash) {
     throw new Error(
-      'No admin password is set. Run the Set Admin Password action.',
+      i18n('No admin password is set. Run the Set Admin Password action.'),
     )
   }
 
@@ -70,19 +70,82 @@ export const main = sdk.setupMain(async ({ effects }) => {
           starting: 5_000,
           failure: 15_000,
         }),
-        fn: () =>
-          sdk.healthCheck.runHealthScript(
-            ['nslookup', '-type=a', healthCheckDomain, `127.0.0.1:${dnsPort}`],
-            adguardSub,
-            {
-              timeout: 20_000,
-              errorMessage: i18n(
-                'AdGuard Home is not resolving DNS queries. Check its upstream DNS servers.',
-              ),
-              message: () => i18n('AdGuard Home is resolving DNS queries'),
-            },
-          ),
+        fn: async () => {
+          // A fresh name each run, so AdGuard's cache can't answer it.
+          const probeName = `${Math.random().toString(36).slice(2, 10)}.${healthCheckDomain}`
+          // Access allowlists must admit the loopback health-check client.
+          const { exitCode, stdout } = await adguardSub.exec(
+            ['nslookup', '-type=a', probeName, `127.0.0.1:${dnsPort}`],
+            { timeout: 20_000 },
+          )
+          // NXDOMAIN is a healthy response to a random probe.
+          const healthy =
+            exitCode === 0 ||
+            (exitCode === 1 &&
+              stdout
+                .toString()
+                .split('\n')
+                .includes(`** server can't find ${probeName}: NXDOMAIN`))
+          if (healthy)
+            return {
+              result: 'success' as const,
+              message: i18n('AdGuard Home is resolving DNS queries'),
+            }
+          const allowed = await adguardYaml
+            .read((c) => c.dns.allowed_clients)
+            .once()
+          // Lookup failure does not distinguish access denial from upstream failure.
+          return {
+            result: 'failure' as const,
+            message: allowed?.length
+              ? i18n(
+                  'The DNS health check failed. Check the upstream DNS servers and ensure 127.0.0.1 is allowed under Settings → Access settings → Allowed clients in AdGuard Home.',
+                )
+              : i18n(
+                  'AdGuard Home is not resolving DNS queries. Check its upstream DNS servers.',
+                ),
+          }
+        },
       },
       requires: ['adguard-home'],
+    })
+    .addHealthCheck('open-resolver', {
+      ready: {
+        display: i18n('Plain DNS Exposure'),
+        trigger: sdk.trigger.statusTrigger(30_000),
+        fn: async () => {
+          const isPublic = await sdk.host
+            .getOwn(
+              effects,
+              'dns',
+              (h) =>
+                !!h?.bindings[dnsPort]?.interfaces.dns?.addressInfo?.public
+                  .hostnames.length,
+            )
+            .once()
+          if (!isPublic)
+            return {
+              result: 'success' as const,
+              message: i18n('Plain DNS is not published to the internet'),
+            }
+          const allowed = await adguardYaml
+            .read((c) => c.dns.allowed_clients)
+            .once()
+          return allowed?.length
+            ? {
+                result: 'success' as const,
+                message: i18n(
+                  'Plain DNS on the internet answers only allowed clients',
+                ),
+              }
+            : {
+                result: 'failure' as const,
+                message: i18n(
+                  'Plain DNS is open to anyone on the internet. Turn off its public addresses, or list your clients under Settings → Access settings → Allowed clients in AdGuard Home. Include 127.0.0.1 for the DNS health check.',
+                ),
+              }
+        },
+      },
+      requires: [],
     })
 })

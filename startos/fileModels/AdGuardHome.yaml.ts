@@ -21,6 +21,7 @@ const dnsShape = z.looseObject({
   port: z.literal(dnsPort).catch(dnsPort),
   trusted_proxies: z.array(z.string()).catch(['127.0.0.0/8', '::1/128']),
   bootstrap_dns: z.array(z.string()).catch([]),
+  allowed_clients: z.array(z.string()).catch([]),
 })
 
 const ignoredShape = z.looseObject({
