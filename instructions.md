@@ -52,18 +52,18 @@ With a home router, using it from your home Wi-Fi also needs NAT loopback (hairp
 
 Private DNS fails with "Couldn't connect" while a VPN is on, including StartTunnel's WireGuard app. Turn the VPN off when you set it up.
 
-**Warning:** anyone who knows the domain can use your server for DNS. To limit who can, list your devices' addresses under **Settings → Access settings → Allowed clients**. Include `127.0.0.1` in that list so the DNS health check can query the server.
+**Warning:** anyone who knows the domain can use your server for DNS. To limit who can, list your devices' addresses under **Settings → DNS → Access settings → Allowed clients**. Include `127.0.0.1` in that list so the DNS health check can query the server.
 
 ## Using it over a StartTunnel VPN
 
 If your phone or laptop connects to StartTunnel with WireGuard, StartTunnel can send their DNS to AdGuard Home. WireGuard already encrypts it, so you don't need Private DNS while the VPN is on.
 
 1. In StartTunnel, open **Subnets**, edit the subnet, set **DNS** to **Custom**, and enter this server's tunnel address with port 5300, for example `10.59.0.13:5300`. The **Device** option doesn't work here, because it always uses port 53.
-2. In AdGuard Home, go to **Settings → DNS settings** and add the subnet's resolver address (the subnet's `.1`, for example `10.59.0.1`) to **Rate limiting allowlist**. All VPN devices reach AdGuard Home from that one address and would otherwise share a limit of 20 lookups per second.
+2. In AdGuard Home, go to **Settings → DNS** and add the subnet's resolver address (the subnet's `.1`, for example `10.59.0.1`) to **Rate-limiting allowlist**. All VPN devices reach AdGuard Home from that one address and would otherwise share a limit of 20 lookups per second.
 3. If this server is on the same subnet, in StartOS go to **System → Gateways**, edit the StartTunnel gateway, and set **DNS** to **Static** (for example `1.1.1.1` and `9.9.9.9`). The server's own lookups then keep working while AdGuard Home is stopped or updating.
 4. On the phone, set **Private DNS** to **Off** or **Automatic** while the VPN is on.
 
-AdGuard Home shows all VPN devices as one client, the subnet's `.1` address. Name it under **Settings → Client settings**.
+AdGuard Home shows all VPN devices as one client, the subnet's `.1` address. Name it under **Settings → Clients**.
 
 StartTunnel's VPN only carries traffic for the tunnel's own addresses. Android's **Block connections without VPN** therefore blocks every website; use **Always-on VPN** without it.
 
@@ -77,7 +77,7 @@ StartTunnel's VPN only carries traffic for the tunnel's own addresses. Android's
 
 ### Web interface
 
-The dashboard opens to statistics for the last day. Blocklists live under **Filters → DNS blocklists**, your own rules under **Filters → Custom filtering rules**, and resolver choices under **Settings → DNS settings**.
+The dashboard opens to statistics for the last day. Blocklists live under **Filters → Blocklists**, your own rules under **Filters → Custom rules**, and resolver choices under **Settings → DNS**.
 
 A new install starts with Quad9 and Cloudflare as upstream servers, asked in parallel, with optimistic caching on and 7 days of query log and statistics. Change any of these in AdGuard Home's settings.
 
@@ -90,7 +90,7 @@ If you publish this server through a tunnel to keep your home IP private, send i
 ## Limitations
 
 - You can't enter this server's address as an ordinary DNS server on your router or devices: StartOS keeps port 53 for its own DNS. Use the **DNS-over-HTTPS** address, the **DNS-over-TLS** address, or the **Plain DNS** port on 5300.
-- Settings under **Settings → Encryption** do nothing here. StartOS already handles encryption for the DNS-over-HTTPS and DNS-over-TLS addresses. DNS-over-QUIC and DNSCrypt are not available.
+- Settings under **Settings → Protocols** do nothing here. StartOS already handles encryption for the DNS-over-HTTPS and DNS-over-TLS addresses. DNS-over-QUIC and DNSCrypt are not available.
 - DNS-over-TLS can't use port 853 without a router port forward.
 - In the query log, devices on a StartTunnel VPN all show the subnet's resolver address.
 - Backups don't include the query log or the downloaded blocklists. After a restore, the blocklists download again as soon as AdGuard Home starts.

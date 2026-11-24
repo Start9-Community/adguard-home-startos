@@ -99,7 +99,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
             result: 'failure' as const,
             message: allowed?.length
               ? i18n(
-                  'The DNS health check failed. Check the upstream DNS servers and ensure 127.0.0.1 is allowed under Settings → Access settings → Allowed clients in AdGuard Home.',
+                  'The DNS health check failed. Check the upstream DNS servers and ensure 127.0.0.1 is allowed under Settings → DNS → Access settings → Allowed clients in AdGuard Home.',
                 )
               : i18n(
                   'AdGuard Home is not resolving DNS queries. Check its upstream DNS servers.',
@@ -141,7 +141,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
             : {
                 result: 'failure' as const,
                 message: i18n(
-                  'Plain DNS is open to anyone on the internet. Turn off its public addresses, or list your clients under Settings → Access settings → Allowed clients in AdGuard Home. Include 127.0.0.1 for the DNS health check.',
+                  'Plain DNS is open to anyone on the internet. Turn off its public addresses, or list your clients under Settings → DNS → Access settings → Allowed clients in AdGuard Home. Include 127.0.0.1 for the DNS health check.',
                 ),
               }
         },
