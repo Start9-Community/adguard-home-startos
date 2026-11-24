@@ -13,7 +13,7 @@ export const manifest = setupManifest({
   volumes: ['main'],
   images: {
     'adguard-home': {
-      source: { dockerTag: 'adguard/adguardhome:v0.107.80' },
+      source: { dockerTag: 'adguard/adguardhome:v1.0.0' },
       arch: ['x86_64', 'aarch64'],
     },
   },

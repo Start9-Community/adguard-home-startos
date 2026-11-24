@@ -36,7 +36,7 @@ const shape = z.looseObject({
   querylog: ignoredShape.catch(() => ignoredShape.parse({})),
   statistics: ignoredShape.catch(() => ignoredShape.parse({})),
   // Seeds a fresh file only; AdGuard Home migrates and rewrites it itself.
-  schema_version: z.number().catch(34),
+  schema_version: z.number().catch(35),
 })
 
 export const adguardYaml = FileHelper.yaml(
