@@ -28,8 +28,8 @@ export default {
     23: 'Exposición del DNS sin cifrar',
     24: 'El DNS sin cifrar no está publicado en internet',
     25: 'El DNS sin cifrar en internet solo responde a los clientes permitidos',
-    26: 'El DNS sin cifrar está abierto a cualquiera en internet. Desactive sus direcciones públicas o indique sus clientes en Settings → Access settings → Allowed clients en AdGuard Home. Incluya 127.0.0.1 para la comprobación de salud del DNS.',
-    27: 'La comprobación de salud del DNS ha fallado. Compruebe los servidores DNS de subida y asegúrese de que 127.0.0.1 esté permitido en Settings → Access settings → Allowed clients en AdGuard Home.',
+    26: 'El DNS sin cifrar está abierto a cualquiera en internet. Desactive sus direcciones públicas o indique sus clientes en Settings → DNS → Access settings → Allowed clients en AdGuard Home. Incluya 127.0.0.1 para la comprobación de salud del DNS.',
+    27: 'La comprobación de salud del DNS ha fallado. Compruebe los servidores DNS de subida y asegúrese de que 127.0.0.1 esté permitido en Settings → DNS → Access settings → Allowed clients en AdGuard Home.',
   },
   de_DE: {
     0: 'Starte AdGuard Home!',
@@ -58,8 +58,8 @@ export default {
     23: 'Erreichbarkeit von unverschlüsseltem DNS',
     24: 'Unverschlüsseltes DNS ist nicht im Internet veröffentlicht',
     25: 'Unverschlüsseltes DNS im Internet antwortet nur zugelassenen Clients',
-    26: 'Unverschlüsseltes DNS ist für jeden im Internet offen. Schalten Sie seine öffentlichen Adressen ab oder tragen Sie Ihre Clients in AdGuard Home unter Settings → Access settings → Allowed clients ein. Nehmen Sie 127.0.0.1 für die DNS-Zustandsprüfung auf.',
-    27: 'Die DNS-Zustandsprüfung ist fehlgeschlagen. Prüfen Sie die Upstream-DNS-Server und stellen Sie sicher, dass 127.0.0.1 in AdGuard Home unter Settings → Access settings → Allowed clients zugelassen ist.',
+    26: 'Unverschlüsseltes DNS ist für jeden im Internet offen. Schalten Sie seine öffentlichen Adressen ab oder tragen Sie Ihre Clients in AdGuard Home unter Settings → DNS → Access settings → Allowed clients ein. Nehmen Sie 127.0.0.1 für die DNS-Zustandsprüfung auf.',
+    27: 'Die DNS-Zustandsprüfung ist fehlgeschlagen. Prüfen Sie die Upstream-DNS-Server und stellen Sie sicher, dass 127.0.0.1 in AdGuard Home unter Settings → DNS → Access settings → Allowed clients zugelassen ist.',
   },
   pl_PL: {
     0: 'Uruchamianie AdGuard Home!',
@@ -88,8 +88,8 @@ export default {
     23: 'Dostępność nieszyfrowanego DNS',
     24: 'Nieszyfrowany DNS nie jest opublikowany w internecie',
     25: 'Nieszyfrowany DNS w internecie odpowiada tylko dozwolonym klientom',
-    26: 'Nieszyfrowany DNS jest otwarty dla każdego w internecie. Wyłącz jego publiczne adresy lub wpisz swoich klientów w AdGuard Home w Settings → Access settings → Allowed clients. Dodaj 127.0.0.1 dla kontroli stanu DNS.',
-    27: 'Kontrola stanu DNS nie powiodła się. Sprawdź nadrzędne serwery DNS i upewnij się, że 127.0.0.1 jest dozwolony w AdGuard Home w Settings → Access settings → Allowed clients.',
+    26: 'Nieszyfrowany DNS jest otwarty dla każdego w internecie. Wyłącz jego publiczne adresy lub wpisz swoich klientów w AdGuard Home w Settings → DNS → Access settings → Allowed clients. Dodaj 127.0.0.1 dla kontroli stanu DNS.',
+    27: 'Kontrola stanu DNS nie powiodła się. Sprawdź nadrzędne serwery DNS i upewnij się, że 127.0.0.1 jest dozwolony w AdGuard Home w Settings → DNS → Access settings → Allowed clients.',
   },
   fr_FR: {
     0: 'Démarrage de AdGuard Home !',
@@ -118,7 +118,7 @@ export default {
     23: 'Exposition du DNS non chiffré',
     24: "Le DNS non chiffré n'est pas publié sur internet",
     25: "Le DNS non chiffré sur internet ne répond qu'aux clients autorisés",
-    26: 'Le DNS non chiffré est ouvert à tout internet. Désactivez ses adresses publiques ou indiquez vos clients dans AdGuard Home sous Settings → Access settings → Allowed clients. Incluez 127.0.0.1 pour la vérification de santé DNS.',
-    27: 'La vérification de santé DNS a échoué. Vérifiez les serveurs DNS en amont et assurez-vous que 127.0.0.1 est autorisé dans AdGuard Home sous Settings → Access settings → Allowed clients.',
+    26: 'Le DNS non chiffré est ouvert à tout internet. Désactivez ses adresses publiques ou indiquez vos clients dans AdGuard Home sous Settings → DNS → Access settings → Allowed clients. Incluez 127.0.0.1 pour la vérification de santé DNS.',
+    27: 'La vérification de santé DNS a échoué. Vérifiez les serveurs DNS en amont et assurez-vous que 127.0.0.1 est autorisé dans AdGuard Home sous Settings → DNS → Access settings → Allowed clients.',
   },
 } satisfies Record<string, LangDict>

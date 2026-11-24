@@ -13,8 +13,8 @@ const dict = {
   'Plain DNS Exposure': 23,
   'Plain DNS is not published to the internet': 24,
   'Plain DNS on the internet answers only allowed clients': 25,
-  'Plain DNS is open to anyone on the internet. Turn off its public addresses, or list your clients under Settings → Access settings → Allowed clients in AdGuard Home. Include 127.0.0.1 for the DNS health check.': 26,
-  'The DNS health check failed. Check the upstream DNS servers and ensure 127.0.0.1 is allowed under Settings → Access settings → Allowed clients in AdGuard Home.': 27,
+  'Plain DNS is open to anyone on the internet. Turn off its public addresses, or list your clients under Settings → DNS → Access settings → Allowed clients in AdGuard Home. Include 127.0.0.1 for the DNS health check.': 26,
+  'The DNS health check failed. Check the upstream DNS servers and ensure 127.0.0.1 is allowed under Settings → DNS → Access settings → Allowed clients in AdGuard Home.': 27,
 
   // interfaces.ts
   'The AdGuard Home dashboard and settings': 7,
